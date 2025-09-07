@@ -10,8 +10,6 @@ const data = {
       summary: `
         <ul>
           <li>Immersion quotidienne en anglais (speaking, compréhension, expressions du quotidien).</li>
-          <li>Mises en situation professionnelles (service, échanges clients, prise de commande).</li>
-          <li>Gain de fluidité à l’oral et confiance en contexte international.</li>
         </ul>
       `,
       tags: ["Anglais", "Immersion", "Communication"]
