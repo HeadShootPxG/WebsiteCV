@@ -4,41 +4,66 @@
 const data = {
   experiences: [
     {
-      role: "Voyage linguistique — Anglais (immersion)",
-      company: "Californie, USA",
-      start: "07/2025", end: "Aujourd’hui",
-      summary: "Amélioration de la compréhension orale et du speaking en contexte quotidien et professionnel.",
+      role: "Voyage linguistique — Anglais",
+      company: "San Diego, USA",
+      start: "04/2025", end: "12/2025",
+      summary: `
+        <ul>
+          <li>Immersion quotidienne en anglais (speaking, compréhension, expressions du quotidien).</li>
+          <li>Mises en situation professionnelles (service, échanges clients, prise de commande).</li>
+          <li>Gain de fluidité à l’oral et confiance en contexte international.</li>
+        </ul>
+      `,
       tags: ["Anglais", "Immersion", "Communication"]
     },
     {
       role: "Chef de rang polyvalent",
       company: "La Réserve — Berck",
-      start: "01/2023", end: "12/2024",
-      summary: "Prise de commande, service, suivi des tables, dressage des desserts, encaissements, conseil clients (plats & vins).",
+      start: "01/2023", end: "01/2025",
+      summary: `
+        <ul>
+          <li>Service en salle jusqu’à ~200 couverts par service, coordination avec la cuisine.</li>
+          <li>Prise de commande, conseil sur les plats et accords mets/vins, suivi des tables.</li>
+          <li>Encaissements, rigueur de caisse, gestion des priorités en période de rush.</li>
+          <li>Fidélisation d’une clientèle locale grâce à un accueil attentif et personnalisé.</li>
+        </ul>
+      `,
       tags: ["Service", "Encaissement", "Conseil"]
     },
     {
       role: "Chef de rang",
       company: "Casino Vikings — Fort-Mahon",
       start: "01/2021", end: "01/2023",
-      summary: "Mise en place de la salle, accueil client, service, suivi des tables, préparation des boissons.",
+      summary: `
+        <ul>
+          <li>Mise en place complète de la salle et préparation des boissons.</li>
+          <li>Accueil client, suivi des commandes, gestion du tempo de service.</li>
+          <li>Participation à la formation de nouveaux collaborateurs.</li>
+        </ul>
+      `,
       tags: ["Accueil", "Service", "Mise en place"]
     },
     {
       role: "Assistant communication",
       company: "CCAS — Abbeville",
       start: "01/2020", end: "01/2021",
-      summary: "Création de supports, animation réseaux sociaux et communauté, organisation d’événements.",
+      summary: `
+        <ul>
+          <li>Création de supports (affiches, flyers) et animation des réseaux sociaux.</li>
+          <li>Organisation d’événements locaux (50 à 300 participants).</li>
+          <li>Amélioration de la visibilité en ligne.</li>
+        </ul>
+      `,
       tags: ["Communication", "Réseaux sociaux", "Événementiel"]
     }
   ],
   skills: [
-    { name: "Service en salle", level: 90, icon: "🥂" },
-    { name: "Prise de commande", level: 85, icon: "📝" },
-    { name: "Encaissements", level: 80, icon: "💳" },
+    { name: "Service en salle", level: 100, icon: "🥂" },
+    { name: "Prise de commande", level: 95, icon: "📝" },
+    { name: "Encaissements", level: 95, icon: "💳" },
     { name: "Relation client", level: 95, icon: "💬" },
-    { name: "Conseil vins & plats", level: 70, icon: "🍷" },
-    { name: "Travail en équipe", level: 88, icon: "🤝" },
+    { name: "Conseil vins & plats", level: 80, icon: "🍷" },
+    { name: "Travail en équipe", level: 100, icon: "🤝" },
   ],
   education: [
     { title: "BGE — Construire & conduire un projet entrepreneurial", period: "2019–2020" },
@@ -47,9 +72,10 @@ const data = {
   ],
   languages: [
     { name: "Français", percent: 100 },
-    { name: "Anglais (immersion)", percent: 70 },
+    { name: "Anglais", percent: 70 },
   ]
 };
+
 
 /***************
  * Helpers UI
@@ -57,93 +83,83 @@ const data = {
 const $ = (q, el=document)=>el.querySelector(q);
 const $$ = (q, el=document)=>Array.from(el.querySelectorAll(q));
 
-/****************************************************
- * Particules canvas (discret, visibles, DPI-safe)
- ****************************************************/
+/***************
+ * Particules canvas (s’adaptent au thème clair/sombre + palette CSS)
+ ***************/
 (function particles(){
-  // — Réglages rapides —
-  const COUNT   = 80;        // nombre de particules
-  const SPEED   = 0.35;      // vitesse +/- (0.2–0.6)
-  const MIN_R   = 1.0;       // rayon mini
-  const MAX_R   = 3.2;       // rayon maxi
-  const COLOR_1 = [168, 85, 247]; // violet
-  const COLOR_2 = [ 34,211, 238]; // cyan
-  const OPACITY = 0.18;      // opacité (0.08–0.25)
-  const CAP_DPR = 2;         // plafond devicePixelRatio (perf)
-
-  const prefersReduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-
   const c = document.getElementById("bg");
+  if (!c) return;
   const ctx = c.getContext("2d");
-  let cssW=0, cssH=0, dpr=1, dots=[];
+  let cssW, cssH, dpr, dots;
 
-  const rand = (a,b)=>Math.random()*(b-a)+a;
-  const pickColor = () => {
-    const [r,g,b] = Math.random()<0.45 ? COLOR_2 : COLOR_1;
-    return `rgba(${r},${g},${b},${OPACITY})`;
-  };
+  // Récupère les couleurs depuis CSS (variables --accentX)
+  function getAccentColors() {
+    const styles = getComputedStyle(document.documentElement);
+    return [
+      styles.getPropertyValue("--accent1").trim(),
+      styles.getPropertyValue("--accent2").trim(),
+      styles.getPropertyValue("--accent3").trim()
+    ];
+  }
 
   function resize(){
     cssW = innerWidth;
     cssH = innerHeight;
-    dpr = Math.max(1, Math.min(CAP_DPR, devicePixelRatio || 1));
-
-    // Taille CSS vs pixel réel (pour éviter le flou / coutures)
-    c.style.width  = cssW + "px";
+    dpr = Math.max(1, Math.min(2, devicePixelRatio || 1));
+    c.style.width = cssW + "px";
     c.style.height = cssH + "px";
-    c.width  = Math.floor(cssW * dpr);
+    c.width = Math.floor(cssW * dpr);
     c.height = Math.floor(cssH * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // (Re)génère les particules
-    dots = Array.from({length: COUNT}, () => ({
-      x:  rand(0, cssW),
-      y:  rand(0, cssH),
-      vx: rand(-SPEED, SPEED),
-      vy: rand(-SPEED, SPEED),
-      r:  rand(MIN_R, MAX_R),
-      c:  pickColor(),
+    const palette = getAccentColors();
+    dots = Array.from({length: 70}, () => ({
+      x: Math.random()*cssW,
+      y: Math.random()*cssH,
+      vx: (Math.random()-.5)*0.35,
+      vy: (Math.random()-.5)*0.35,
+      r : Math.random()*2.5+1,
+      color: palette[Math.floor(Math.random()*palette.length)]
     }));
   }
 
-  function drawFrame(){
-    ctx.clearRect(0,0,cssW,cssH);
-    for(const d of dots){
-      d.x += d.vx; d.y += d.vy;
-      if(d.x<0 || d.x>cssW) d.vx *= -1;
-      if(d.y<0 || d.y>cssH) d.vy *= -1;
+function step() {
+  ctx.clearRect(0, 0, cssW, cssH);
 
-      ctx.beginPath();
-      ctx.fillStyle = d.c;
-      ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
-      ctx.fill();
-    }
-    requestAnimationFrame(drawFrame);
+  // Détection du thème
+  const isLight = document.body.classList.contains("light");
+
+  // Alpha plus élevé en clair
+  const alpha = isLight ? "55" : "33"; // hex alpha
+
+  for (const d of dots) {
+    // Déplacement
+    d.x += d.vx;
+    d.y += d.vy;
+    if (d.x < 0 || d.x > cssW) d.vx *= -1;
+    if (d.y < 0 || d.y > cssH) d.vy *= -1;
+
+    // En clair → on augmente un peu la taille pour mieux voir
+    const radius = isLight ? d.r * 1.2 : d.r;
+
+    // Dessin
+    ctx.beginPath();
+    ctx.fillStyle = d.color + alpha;
+    ctx.arc(d.x, d.y, radius, 0, Math.PI * 2);
+    ctx.fill();
   }
+
+  requestAnimationFrame(step);
+}
+
 
   addEventListener("resize", resize, {passive:true});
-  resize();
 
-  if (prefersReduced) {
-    // Version statique si l’utilisateur préfère moins d’animations
-    for(const d of dots){
-      ctx.beginPath();
-      ctx.fillStyle = d.c;
-      ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
-      ctx.fill();
-    }
-    return;
-  }
+  // Recalcule quand le thème change
+  document.addEventListener("themechange", resize);
 
-  drawFrame();
-
-  // (Optionnel) Helpers console :
-  // window.__particles = {
-  //   intensity(n){ dots.length = Math.max(0, Math.min(300, n|0)); while(dots.length<n) dots.push({x:rand(0,cssW),y:rand(0,cssH),vx:rand(-SPEED,SPEED),vy:rand(-SPEED,SPEED),r:rand(MIN_R,MAX_R),c:pickColor()}); },
-  //   recolor(){ dots.forEach(d=>d.c=pickColor()); }
-  // };
+  resize(); step();
 })();
-
 
 
 /***************
@@ -161,7 +177,9 @@ const $$ = (q, el=document)=>Array.from(el.querySelectorAll(q));
         <div class="t-date">${e.start} → ${e.end}</div>
       </div>
       <div class="t-details"><div>
-        <p>${e.summary}</p>
+        <div class="t-summary">
+          ${e.summary}
+        </div>
         <div class="t-tags">
           ${e.tags.map(t=>`<span class="tag">${t}</span>`).join("")}
         </div>
@@ -169,14 +187,26 @@ const $$ = (q, el=document)=>Array.from(el.querySelectorAll(q));
     </article>
   `).join("");
 
-  container.addEventListener("click", (ev)=>{
-    const head = ev.target.closest(".t-head");
-    if(!head) return;
-    const idx = +head.dataset.idx;
-    const item = head.parentElement;
-    item.classList.toggle("open");
-  });
+container.addEventListener("click", (ev) => {
+  // 1) si clic dans la tête -> toggle
+  const head = ev.target.closest(".t-head");
+  if (head) {
+    head.parentElement.classList.toggle("open");
+    return;
+  }
+
+  // 2) sinon, si clic quelque part dans l’item (zone vide/padding), on toggle aussi
+  const item = ev.target.closest(".t-item");
+  if (!item) return;
+
+  // 3) mais on ignore les clics sur des éléments interactifs à l’intérieur
+  if (ev.target.closest(".t-tags, a, button")) return;
+
+  item.classList.toggle("open");
+});
+
 })();
+
 
 /***************
  * Compétences (barres animées)
@@ -257,34 +287,65 @@ const $$ = (q, el=document)=>Array.from(el.querySelectorAll(q));
   }).join("");
 
   // --- Animation une fois à l’apparition (IntersectionObserver)
-  const rings = root.querySelectorAll(".progress");
-  const io = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (entry.isIntersecting) {
-        const el = entry.target;
-        // anime du 0% (dashoffset=CIRC) vers la valeur cible
-        el.style.strokeDashoffset = el.getAttribute("data-target");
-        io.unobserve(el); // ne rejoue pas automatiquement
-      }
-    }
-  }, { threshold: 0.4 }); // ~40% visible
+const rings = root.querySelectorAll(".progress");
+const io = new IntersectionObserver((entries) => {
+  for (const entry of entries) {
+    if (!entry.isIntersecting) continue;
+    const el = entry.target;
+    const target = el.getAttribute("data-target");
+    const full   = el.getAttribute("stroke-dasharray"); // CIRC
 
-  rings.forEach(el => io.observe(el));
+    // RESET à 0% (plein cercle vide) pour être sûr que la transition parte bien
+    el.style.strokeDashoffset = full;
 
-  // --- Rejouer l’anim au survol (optionnel)
-  root.addEventListener("mouseenter", (e) => {
-    const prog = e.target.closest(".radial")?.querySelector(".progress");
-    if (!prog) return;
-    const target = prog.getAttribute("data-target");
-    const full = prog.getAttribute("stroke-dasharray"); // CIRC
-    // reset à 0%…
-    prog.style.strokeDashoffset = full;
-    // …force reflow pour relancer la transition
-    // eslint-disable-next-line no-unused-expressions
-    prog.getBoundingClientRect();
-    // puis anime vers la cible
+    // ⚡ force un reflow pour “valider” l’état initial
+    void el.getBoundingClientRect();
+
+    // ⏭️ déclenche au frame suivant (fiable sur Chrome/Firefox/Safari)
+    requestAnimationFrame(() => {
+      el.style.strokeDashoffset = target;
+    });
+
+    io.unobserve(el); // on ne rejoue pas automatiquement
+  }
+}, { threshold: 0.4 });
+
+rings.forEach(el => io.observe(el));
+
+
+// --- Rejouer l’anim (survol, focus, touch) par élément
+function replay(rad){
+  const prog = rad.querySelector(".progress");
+  if (!prog) return;
+  const target = prog.getAttribute("data-target");
+  const full   = prog.getAttribute("stroke-dasharray"); // CIRC
+
+  // safety: s'il n'y a pas déjà une transition en CSS
+  prog.style.transition = "stroke-dashoffset 900ms ease-out";
+
+  // reset → reflow → animate
+  prog.style.strokeDashoffset = full;
+  void prog.getBoundingClientRect();
+  requestAnimationFrame(() => {
     prog.style.strokeDashoffset = target;
-  }, true);
+  });
+}
+
+root.querySelectorAll(".radial").forEach((rad) => {
+  // survol (entree dans le conteneur)
+  rad.addEventListener("pointerenter", () => replay(rad));
+  rad.addEventListener("mouseenter",   () => replay(rad)); // fallback
+
+  // accessibilité clavier
+  rad.setAttribute("tabindex", "0");
+  rad.addEventListener("focusin", () => replay(rad));
+
+  // mobile
+  rad.addEventListener("touchstart", () => replay(rad), {passive:true});
+});
+
+
+
 })();
 
 
@@ -308,6 +369,8 @@ const $$ = (q, el=document)=>Array.from(el.querySelectorAll(q));
   btn.addEventListener("click", ()=>{
     document.body.classList.toggle("light");
     localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
+  
+    document.dispatchEvent(new Event("themechange"));
   });
 })();
 
@@ -325,3 +388,93 @@ btt.addEventListener("click", ()=>{ scrollTo({top:0, behavior:"smooth"}); });
  * Footer année
  ***************/
 $("#year").textContent = new Date().getFullYear();
+
+
+// Ouvrir tous les accordéons avant impression, puis restaurer l'état après
+(function enablePrintOpenClose(){
+  const OPEN_CLASS = "open";
+  const PRINT_MARK = "print-open";
+
+  function openAll() {
+    document.querySelectorAll(".t-item").forEach(el => {
+      if (!el.classList.contains(OPEN_CLASS)) {
+        el.classList.add(OPEN_CLASS, PRINT_MARK);
+      }
+    });
+  }
+
+  function restore() {
+    document.querySelectorAll(`.t-item.${PRINT_MARK}`).forEach(el => {
+      el.classList.remove(OPEN_CLASS, PRINT_MARK);
+    });
+  }
+
+  // Navigateurs modernes
+  window.addEventListener("beforeprint", openAll);
+  window.addEventListener("afterprint", restore);
+
+  // Fallback (certains browsers invoquent matchMedia au lieu de before/afterprint)
+  const mql = window.matchMedia("print");
+  if (mql && typeof mql.addEventListener === "function") {
+    mql.addEventListener("change", e => {
+      if (e.matches) openAll(); else restore();
+    });
+  }
+})();
+
+document.querySelectorAll(
+  ".card, .t-item, .skills .skill, .edu li"
+).forEach(el => el.classList.add("lift"));
+
+/***************
+ * Scrollspy (met en surbrillance le lien de la section visible)
+ ***************/
+(function scrollSpy(){
+  const nav = document.querySelector('.nav');
+  const links = Array.from(document.querySelectorAll('.nav .links a'));
+  const sections = links
+    .map(a => document.querySelector(a.getAttribute('href')))
+    .filter(Boolean);
+
+  // 1) Activer/désactiver l’ombre de la nav quand on scrolle
+  function onScrollShadow(){
+    if (window.scrollY > 10) nav.classList.add('is-stuck');
+    else nav.classList.remove('is-stuck');
+  }
+  onScrollShadow();
+  window.addEventListener('scroll', onScrollShadow, {passive:true});
+
+  // 2) Observer les sections au centre du viewport
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      const id = '#' + e.target.id;
+      links.forEach(a => a.classList.toggle('is-active', a.getAttribute('href') === id));
+    }
+  }, {
+    // on considère la section active quand ~40% du bloc est visible,
+    // et on déclenche plutôt au centre du viewport:
+    root: null,
+    threshold: 0.4,
+    rootMargin: '-20% 0px -40% 0px'
+  });
+
+  sections.forEach(sec => io.observe(sec));
+
+  // 3) Smooth scroll + correction d’ancrage (compatible modes)
+  const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  links.forEach(a => {
+    a.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (!target) return;
+      const top = target.getBoundingClientRect().top + window.scrollY - 80; // 80 ~ hauteur nav
+      window.scrollTo({
+        top,
+        behavior: prefersReduced ? 'auto' : 'smooth'
+      });
+      // met à jour l’état actif immédiatement (feedback)
+      links.forEach(l => l.classList.toggle('is-active', l === a));
+    });
+  });
+})();
