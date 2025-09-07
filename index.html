@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CV — Jason Fievez</title>
+  <meta name="description" content="CV interactif de Jason Fievez — service client, chef de rang, communication." />
+  <link rel="preload" href="assets/profile.jpg" as="image" />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Open Graph (aperçus LinkedIn/FB) -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Jason Fievez — Chef de rang polyvalent" />
+<meta property="og:description" content="Service client, relation, encaissement, immersion en Californie." />
+<meta property="og:image" content="assets/cover.jpg" />
+<meta property="og:url" content="http://localhost:5173/" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Jason Fievez — Chef de rang polyvalent" />
+<meta name="twitter:description" content="Service client, relation, encaissement, immersion en Californie." />
+<meta name="twitter:image" content="assets/cover.jpg" />
+
+<!-- Couleur du navigateur (mobile) -->
+<meta name="theme-color" content="#0b1020" />
+
+<!-- Données structurées (SEO) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Jason Fievez",
+  "jobTitle": "Chef de rang polyvalent",
+  "email": "mailto:Jason.Fievez@free.fr",
+  "telephone": "+33612661680",
+  "address": { "@type": "PostalAddress", "addressLocality": "Gamaches, FR" },
+  "description": "Service client, relation, encaissements. Immersion linguistique en Californie.",
+  "url": "http://localhost:5173/",
+  "image": "http://localhost:5173/assets/profile.jpg",
+  "sameAs": []
+}
+</script>
+
+</head>
+<body>
+  <a class="skip-link" href="#about">Aller au contenu principal</a>
+
+  <!-- Fond dynamique -->
+  <canvas id="bg" aria-hidden="true"></canvas>
+  <div class="page">
+
+    <!-- Barre nav ancrages -->
+    <nav class="nav">
+      <a href="#top" class="brand">JF</a>
+      <div class="links">
+        <a href="#about">À propos</a>
+        <a href="#exp">Expérience</a>
+        <a href="#skills">Compétences</a>
+        <a href="#edu">Formation</a>
+        <a href="#lang">Langues</a>
+      </div>
+      <div class="tools">
+        <button id="themeToggle" aria-label="Basculer thème">🌗</button>
+        <a id="printBtn" class="btn small" href="#">PDF</a>
+      </div>
+    </nav>
+
+    <!-- En-tête / Hero -->
+    <header id="top" class="hero">
+      <div class="pfp">
+        <img src="assets/profile.jpg" alt="Photo de Jason" />
+        <span class="halo"></span>
+      </div>
+      <div class="hero-text">
+        <h1 class="glow">Jason Fievez</h1>
+        <p class="subtitle">Chef de rang polyvalent — orienté service client</p>
+        <div class="badge">Actuellement en voyage linguistique en Californie</div>
+        <p class="meta">
+          📍 Gamaches (80220) ·
+          <a href="mailto:Jason.Fievez@free.fr">📧 Jason.Fievez@free.fr</a> ·
+          <a href="tel:+33612661680">📞 +33 6 12 66 16 80</a>
+        </p>
+        <div class="cta">
+          <a class="btn" href="#exp">Voir mon expérience</a>
+          <a class="btn ghost" href="#about">En savoir plus</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- À propos -->
+      <section id="about" class="card">
+        <h2>À propos</h2>
+        <p>
+          Employé de salle en casino, puis serveur et barman. Aujourd’hui, je développe mon anglais en immersion aux
+          États-Unis pour renforcer communication, service et relation client.
+        </p>
+      </section>
+
+      <!-- Expériences (timeline accordéon) -->
+      <section id="exp" class="card">
+        <h2>Expérience</h2>
+        <div class="timeline" id="timeline">
+          <!-- items injectés par script.js depuis data.experiences -->
+        </div>
+      </section>
+
+      <!-- Compétences (barres + icônes) -->
+      <section id="skills" class="card">
+        <h2>Compétences</h2>
+        <div class="skills" id="skillsList">
+          <!-- items injectés par script.js -->
+        </div>
+      </section>
+
+      <!-- Formation -->
+      <section id="edu" class="card">
+        <h2>Formation</h2>
+        <ul class="edu" id="eduList"></ul>
+      </section>
+
+      <!-- Langues (cadrans radiaux) -->
+      <section id="lang" class="card">
+        <h2>Langues</h2>
+        <div class="radials" id="langRadials">
+          <!-- items injectés par script.js -->
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      © <span id="year"></span> Jason Fievez — <a href="#top">Retour en haut ↑</a>
+    </footer>
+
+    <!-- Bouton back-to-top flottant -->
+    <button id="backToTop" class="backtotop" aria-label="Retour en haut">↑</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
