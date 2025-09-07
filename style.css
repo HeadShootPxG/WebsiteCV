@@ -158,6 +158,63 @@ body{
 .radial svg{width:70%; height:70%}
 .radial .label{position:absolute; bottom:10px; font-weight:600}
 
+/* Fix hit-area des radiaux : on capte le hover sur le conteneur, pas sur le SVG */
+.radial { position: relative; }
+.radial svg,
+.radial .label {
+  pointer-events: none;    /* les enfants ne captent pas la souris */
+}
+/* (facultatif) si tu as d'autres éléments cliquables dans .radial, retire-leur ce rule */
+
+/* La tête doit occuper toute la largeur et capter les clics */
+.t-item { position: relative; z-index: 0; }
+.t-head {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  cursor: pointer;
+  min-height: 38px;                 /* petite hauteur utile pour la zone */
+}
+
+/* Couche invisible qui couvre TOUTE la tête, même s'il y a des "trous" */
+.t-head::before{
+  content:"";
+  position:absolute;
+  inset:-6px;                       /* hit-area un peu plus large que le texte */
+  background: transparent;
+  z-index: 1;
+}
+
+/* Le contenu visuel passe dessus, mais ne "vole" pas les events */
+.t-head > * {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;             /* tout clic passe à .t-head */
+}
+/* si tu as des liens cliquables dans .t-head (rare), réactive-les : */
+/* .t-head a { pointer-events: auto; } */
+
+/* Empilement propre : les détails restent en dessous de la tête */
+.t-details { position: relative; z-index: 0; }
+
+
+/* ——— Hit-area robuste pour chaque carte langue ——— */
+.radials { position: relative; z-index: 0; }           /* nouveau */
+.radial  { position: relative; z-index: 1; overflow: visible; }  /* z-index>0 pour passer devant d'éventuels overlays */
+.radial::before{
+  content:"";
+  position:absolute; inset:0;                          /* couvre 100% de la carte */
+  background: transparent;
+  /* important : cet élément capte les events et les laisse remonter au parent */
+}
+.radial svg, 
+.radial .label { pointer-events: none; }               /* les enfants ne volent plus les events */
+
+/* Si un autre bloc recouvre, on le remet derrière */
+.card { position: relative; z-index: 0; }              /* s’assure que les .radial (z:1) dominent dans la carte */
+
+
 /* Footer + back-to-top */
 .footer{opacity:.7; text-align:center; padding:26px 8px}
 .footer a{color:var(--accent1); text-decoration:none}
@@ -185,16 +242,109 @@ body{
 }
 
 
-/* Thème clair */
+/* Thème clair — variables plus douces */
 .light{
-  --bg:#f6f7fb;
-  --bg2:#ffffff;
-  --fg:#0a1022;
-  --muted:#4a5678;
-  --card:#ffffffcc;
-  --border:#e6e9f3;
+  /* couleurs de base en clair (pastel) */
+  --bg:#f4f7ff;          /* fond général */
+  --bg2:#ffffff;         /* variantes */
+  --fg:#1e293b;          /* texte principal (gris bleu) */
+  --muted:#64748b;       /* texte atténué */
+  --card:#ffffffee;      /* carte translucide */
+  --border:#e6e9f3;      /* bordures claires */
+  /* accents un peu plus doux en clair */
+  --accent1:#22d3ee;     /* cyan */
+  --accent2:#a78bfa;     /* violet adouci */
+  --accent3:#f472b6;     /* rose */
+  --glow: 0 0 20px rgba(34,211,238,.18), 0 0 36px rgba(167,139,250,.12);
 }
-.light .btn{color:#fff}
+
+/* Fond clair stylisé (au lieu d’un blanc plein) */
+.light body {
+  background:
+    radial-gradient(1200px 600px at 8% -10%, rgba(167,139,250,.14), transparent 60%),
+    radial-gradient(1000px 600px at 108% 8%, rgba(34,211,238,.12), transparent 60%),
+    linear-gradient(160deg, #f3f4f7 0%, #e9edf7 100%);
+  color: var(--fg);
+}
+
+
+/* Cartes & hero en clair : léger relief + bords doux */
+.light .card,
+.light .hero{
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.06) !important;
+}
+
+/* Barre de nav translucide en clair */
+.light .nav{
+  background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.7));
+  border: 1px solid var(--border);
+  backdrop-filter: saturate(140%) blur(8px);
+}
+
+/* Badge en clair */
+.light .badge{
+  background: linear-gradient(90deg, rgba(34,211,238,.10), rgba(167,139,250,.10));
+  border: 1px solid #dde3f3;
+  color: #213547;
+}
+
+/* Timeline en clair : contraste plus doux */
+.light .t-item{
+  background: rgba(0,0,0,.02);
+  border-left-color: var(--accent1);
+}
+.light .t-item:hover{
+  background: rgba(0,0,0,.04);
+}
+.light .t-date{ color: #6b7280; }
+
+/* Tags/skills en clair */
+.light .tag{
+  border-color: #e6e9f3;
+  background: #ffffff;
+  color: #334155;
+}
+.light .skill .bar{ background: rgba(2,6,23,.08); }
+
+/* Boutons en clair */
+.light .btn{
+  color: #0b1020;
+  box-shadow: 0 4px 12px rgba(2,6,23,.08);
+}
+.light .btn.ghost{
+  color: #0b1020;
+  border-color: var(--border);
+  background: #ffffffaa;
+}
+
+/* Titre dégradé lisible sur clair (garde l’effet) */
+.light .glow{
+  background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent3));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: none;
+}
+
+/* Liens en clair : accent visibles mais doux */
+.light .meta a,
+.light .footer a{
+  color: #0ea5b7; /* cyan un poil plus sombre pour le clair */
+}
+
+/* Photo halo : garde l’effet mais réduit un peu en clair */
+.light .pfp .halo{ opacity: .45; filter: blur(16px); }
+
+/* Bordures générales (cartes, items, sections) unifiées en clair */
+.light .card,
+.light .hero,
+.light .edu li{
+  border-color: var(--border);
+}
+
+/* Contraste des sous-titres en clair */
+.light .subtitle{ color: #475569; }
+
 
 /* Responsif */
 @media (max-width:720px){
@@ -203,6 +353,15 @@ body{
 }
 
 @media print {
+  .t-item { 
+    break-inside: avoid; page-break-inside: avoid; 
+  }
+  .t-item .t-details {
+    display: block !important;
+    grid-template-rows: 1fr !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
   /* Format et marges */
   @page { size: A4; margin: 14mm }
 
@@ -213,10 +372,15 @@ body{
   }
 
   /* Nettoyage : on masque les éléments d’UI non pertinents */
-  #bg, .nav, .backtotop, .cta, .tools, .btn.ghost { display: none !important; }
+  #bg, .nav, .backtotop, .cta, .tools, .btn.ghost { 
+    display: none !important; 
+  }
 
   /* Fond blanc + texte noir pour la lisibilité */
-  body { background: #fff !important; color: #000 !important; }
+  body { 
+    background: #fff !important; 
+    color: #000 !important; 
+  }
   .card, .hero {
     background: #fff !important;
     border: 1px solid #ddd !important;
@@ -230,8 +394,16 @@ body{
 
   /* Typo légèrement plus dense sur papier */
   body { font-size: 12.5pt; line-height: 1.35; }
-  h1 { font-size: 22pt; -webkit-text-fill-color: #000 !important; color:#000 !important; }
-  h2 { font-size: 14pt; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+  h1 { 
+    font-size: 22pt; 
+    -webkit-text-fill-color: #000 !important; 
+    color:#000 !important; 
+  }
+  h2 { 
+    font-size: 14pt; 
+    border-bottom: 1px solid #ccc; 
+    padding-bottom: 4px; 
+  }
 
   /* Gestion des sauts de page */
   .hero, .card { page-break-inside: avoid; break-inside: avoid; }
@@ -243,5 +415,99 @@ body{
     font-size: 9pt;
     color: #555;
   }
+
+  /* ✅ Fix compétences/tags pour éviter chevauchements */
+  .skills,
+  .t-tags,
+  .chip,
+  .tag {
+    display: block !important;
+    max-width: 100% !important;
+  }
+
+  .skills .skill,
+  .t-tags .tag,
+  .chip,
+  .tag {
+    margin: 2px 0 !important;
+    display: block !important;
+    width: 100% !important;
+  }
+
+  /* Masquer les éléments animés type "marquee" */
+  .marquee { display: none !important; }
+
+  /* Police plus petite pour listes de compétences */
+  .skills,
+  .t-tags {
+    font-size: 11pt !important;
+    line-height: 1.3 !important;
+  }
+}
+
+/* Survol 3D léger */
+.lift {
+  transform-style: preserve-3d;
+  transition: transform 280ms ease, box-shadow 280ms ease;
+}
+.lift:hover {
+  transform: translateY(-6px) rotateX(1.6deg) rotateY(-1.6deg);
+  box-shadow: 0 14px 28px rgba(2,6,23,0.15);
+}
+
+/* variantes plus douces sur mobile */
+@media (hover:none){
+  .lift:hover { transform: none; box-shadow: none; }
+}
+
+/* ===== Scrollspy : lien actif dans la nav ===== */
+.nav .links a.is-active{
+  color: var(--fg);
+  background: linear-gradient(90deg, rgba(34,211,238,.15), rgba(167,139,250,.15));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px; /* même padding que tes liens */
+}
+
+/* Petit trait décoratif sous le lien actif (optionnel) */
+.nav .links a.is-active::after{
+  content:"";
+  position:absolute; left:10px; right:10px; bottom:-6px; height:2px;
+  border-radius:2px;
+  background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent3));
+  opacity:.9;
+}
+
+/* Ombre de la nav quand on scrolle (feedback visuel) */
+.nav.is-stuck { box-shadow: 0 8px 22px rgba(2,6,23,.18); }
+
+/* Compense la hauteur de la nav sticky lorsqu'on arrive sur une ancre */
+#about, #exp, #skills, #edu, #lang { scroll-margin-top: 84px; }
+
+/* Variante en thème clair (optionnel, un peu plus doux) */
+.light .nav .links a.is-active{
+  background: linear-gradient(90deg, rgba(34,211,238,.10), rgba(167,139,250,.10));
+  border-color: #e6e9f3;
+}
+
+/* Listes dans les résumés d’expérience */
+.t-summary ul { 
+  margin: 6px 0 8px; 
+  padding-left: 1.1em; 
+  list-style: disc; 
+}
+.t-summary li { 
+  margin: 4px 0; 
+  line-height: 1.45; 
+}
+
+/* Impression : listes bien lisibles */
+@media print {
+  .t-summary ul { 
+    list-style: disc inside; 
+    padding-left: 0; 
+    margin: 4px 0 6px; 
+  }
+  .t-summary li { margin: 2px 0; }
 }
 
