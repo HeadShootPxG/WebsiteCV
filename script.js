@@ -9,7 +9,9 @@ const data = {
       start: "04/2025", end: "12/2025",
       summary: `
         <ul>
-          <li>Immersion quotidienne en anglais (speaking, compréhension, expressions du quotidien).</li>
+          <li>Immersion complète en anglais (vie quotidienne & contexte professionnel).</li>
+          <li>Développement de la compréhension orale et fluidité à l’oral.</li>
+          <li>Adaptation culturelle et communication en environnement international.</li>
         </ul>
       `,
       tags: ["Anglais", "Immersion", "Communication"]
@@ -29,14 +31,15 @@ const data = {
       tags: ["Service", "Encaissement", "Conseil"]
     },
     {
-      role: "Chef de rang",
+      role: "Chef de rang / Technicien machine à sous",
       company: "Casino Vikings — Fort-Mahon",
       start: "01/2021", end: "01/2023",
       summary: `
         <ul>
           <li>Mise en place complète de la salle et préparation des boissons.</li>
-          <li>Accueil client, suivi des commandes, gestion du tempo de service.</li>
-          <li>Participation à la formation de nouveaux collaborateurs.</li>
+          <li>Accueil client, suivi des commandes, information et accompagnement machine à sous.</li>
+          <li>Support technique de premier niveau sur les machines à sous (diagnostic simple, réinitialisation, suivi incidents).</li>
+          <li>Participation au maintien d’un haut niveau de satisfaction client.</li>
         </ul>
       `,
       tags: ["Accueil", "Service", "Mise en place"]
@@ -186,22 +189,14 @@ function step() {
   `).join("");
 
 container.addEventListener("click", (ev) => {
-  // 1) si clic dans la tête -> toggle
-  const head = ev.target.closest(".t-head");
-  if (head) {
-    head.parentElement.classList.toggle("open");
-    return;
-  }
-
-  // 2) sinon, si clic quelque part dans l’item (zone vide/padding), on toggle aussi
-  const item = ev.target.closest(".t-item");
-  if (!item) return;
-
-  // 3) mais on ignore les clics sur des éléments interactifs à l’intérieur
+  // ignorer les clics sur tags/liens/boutons
   if (ev.target.closest(".t-tags, a, button")) return;
 
+  const item = ev.target.closest(".t-item");
+  if (!item) return;
   item.classList.toggle("open");
 });
+
 
 })();
 
@@ -240,6 +235,11 @@ container.addEventListener("click", (ev) => {
     `<li><strong>${e.title}</strong> <span class="date">${e.period}</span></li>`
   ).join("");
 })();
+
+// Accessibilité : chaque entrée peut recevoir le focus clavier
+document.querySelectorAll('#eduList li').forEach(li => {
+  li.setAttribute('tabindex', '0');
+});
 
 /***************
  * Langues (SVG animé : une fois à l’apparition + rejouable au survol)
@@ -310,7 +310,6 @@ const io = new IntersectionObserver((entries) => {
 
 rings.forEach(el => io.observe(el));
 
-
 // --- Rejouer l’anim (survol, focus, touch) par élément
 function replay(rad){
   const prog = rad.querySelector(".progress");
@@ -341,9 +340,6 @@ root.querySelectorAll(".radial").forEach((rad) => {
   // mobile
   rad.addEventListener("touchstart", () => replay(rad), {passive:true});
 });
-
-
-
 })();
 
 
@@ -360,7 +356,7 @@ root.querySelectorAll(".radial").forEach((rad) => {
   if(saved){
     document.body.classList.toggle("light", saved === "light");
   } else {
-    // si l'utilisateur préfère sombre OU s'il fait nuit => sombre
+    // si l'utilisateur préfère sombre OU s'il fait nuit => sombre // corriger le theme clair
     document.body.classList.toggle("light", !(prefersDark || night));
   }
 
@@ -385,7 +381,7 @@ btt.addEventListener("click", ()=>{ scrollTo({top:0, behavior:"smooth"}); });
 /***************
  * Footer année
  ***************/
-$("#year").textContent = new Date().getFullYear();
+$("#year").textContent = new Date().getFullYear(); // 
 
 
 // Ouvrir tous les accordéons avant impression, puis restaurer l'état après
@@ -476,3 +472,62 @@ document.querySelectorAll(
     });
   });
 })();
+
+(function revealOnScroll(){
+  const els = document.querySelectorAll('.card, .hero, .skill, .edu li');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  els.forEach(el => {
+    el.classList.add('reveal');
+    io.observe(el);
+  });
+})();
+
+/***************
+ * Hero typing
+ ***************/
+(function typing(){
+  const el = document.getElementById('typing');
+  if(!el) return;
+
+  // Tu peux lister plusieurs phrases : elles se joueront en boucle
+  const texts = [
+    "Chef de rang polyvalent",
+    "Relation client, encaissements, service premium",
+    "Disponible immédiatement"
+  ];
+  const speed = 28;       // ms par caractère
+  const hold  = 1000;     // pause en fin de phrase
+  const erase = 16;       // vitesse d'effacement
+
+  let iText = 0, i = 0, dir = 1; // dir: 1 tape, -1 efface
+
+  function tick(){
+    const t = texts[iText];
+    el.textContent = t.slice(0, i);
+
+    if(dir === 1 && i < t.length){ i++; return setTimeout(tick, speed); }
+    if(dir === 1 && i === t.length){ dir = -1; return setTimeout(tick, hold); }
+    if(dir === -1 && i > 0){ i--; return setTimeout(tick, erase); }
+    if(dir === -1 && i === 0){ dir = 1; iText = (iText+1) % texts.length; return setTimeout(tick, 300); }
+  }
+  tick();
+})();
+
+// Halo sur boutons sociaux (met à jour --mx/--my)
+document.addEventListener('mousemove', (e)=>{
+  const t = e.target.closest('.socials .social-btn');
+  if(!t) return;
+  const r = t.getBoundingClientRect();
+  const x = ((e.clientX - r.left) / r.width) * 100;
+  const y = ((e.clientY - r.top) / r.height) * 100;
+  t.style.setProperty('--mx', `${x}%`);
+  t.style.setProperty('--my', `${y}%`);
+}, {passive:true});
