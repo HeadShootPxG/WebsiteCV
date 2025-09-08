@@ -80,7 +80,7 @@ body{
 .pfp .halo{
   position:absolute; inset:-10px; border-radius:50%;
   background:conic-gradient(from 0deg, var(--accent1), var(--accent2), var(--accent3), var(--accent1));
-  filter:blur(18px); opacity:.6; animation:spin 8s linear infinite;
+  filter:blur(18px); opacity:.3; animation:spin 8s linear infinite;
   z-index:-1;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -332,8 +332,6 @@ body{
   color: #0ea5b7; /* cyan un poil plus sombre pour le clair */
 }
 
-/* Photo halo : garde l’effet mais réduit un peu en clair */
-.light .pfp .halo{ opacity: .45; filter: blur(16px); }
 
 /* Bordures générales (cartes, items, sections) unifiées en clair */
 .light .card,
@@ -511,3 +509,566 @@ body{
   .t-summary li { margin: 2px 0; }
 }
 
+/* === Forcer pleine largeur des lignes === */
+
+/* Timeline : une seule colonne qui s'étire */
+.timeline{
+  display: grid;
+  grid-template-columns: 1fr;      /* ← pleine largeur */
+  justify-items: stretch;          /* ← l’item s’étire */
+}
+
+/* Chaque item prend 100% et ne se limite pas à son contenu */
+.t-item{
+  width: 100%;
+}
+
+/* La tête occupe toute la ligne, pas seulement le texte */
+.t-head{
+  width: 100%;
+  min-width: 0;                    /* ← évite des comportements Flex/Safari bizarres */
+}
+
+/* Compétences : une colonne qui s’étire */
+.skills{
+  display: grid;
+  grid-template-columns: 1fr;      /* ← pleine largeur */
+  justify-items: stretch;
+}
+
+/* Chaque compétence remplit la ligne */
+.skill{
+  width: 100%;
+}
+
+/* (optionnel mais utile) Dans les cartes, étire aussi le contenu */
+.card > *{
+  width: 100%;
+}
+
+/* Si tu utilises .lift/.hover avec transform, garde l’étirement */
+.lift{ width: 100%; }
+
+/* ====== DEBUG (temporaire) : visualiser la zone de hover ====== */
+.t-item:hover::after,
+.skill:hover::after {
+  content:"";
+  position:absolute; inset:0;
+  background: rgba(0, 200, 255, .06);   /* surlignage léger */
+  pointer-events: none;
+}
+
+/* ====== Forcer l’étirement en pleine largeur ====== */
+.timeline { display:grid; grid-template-columns: 1fr; justify-items: stretch; }
+.skills   { display:grid; grid-template-columns: 1fr; justify-items: stretch; }
+
+.t-item, .skill { 
+  position: relative; 
+  width: 100%; 
+  isolation: isolate; 
+  overflow: hidden; 
+  border-radius: 10px;
+}
+
+/* La tête des expériences occupe toute la rangée */
+.t-head {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  cursor: pointer;
+  min-height: 44px;
+  padding: 8px 6px;
+  z-index: 2; /* au-dessus des détails */
+}
+
+/* Les détails restent sous la tête et confinés dans l’item */
+.t-details { position: relative; z-index: 1; }
+
+/* ====== Couche de capture : survol/clic partout ====== */
+/* Expériences */
+.t-head::before {
+  content:""; position:absolute; inset:-10px;
+  background: transparent; z-index: 1; /* capte les events */
+}
+/* Le contenu visuel ne vole pas les events */
+.t-head > * { position: relative; z-index: 2; pointer-events: none; }
+/* Si tu as des liens dans .t-head, réactive-les : */
+/* .t-head a { pointer-events: auto; } */
+
+/* Compétences : toute la carte réagit */
+.skill::before {
+  content:""; position:absolute; inset:0;
+  background: transparent; z-index: 1; /* capte les events */
+}
+.skill > * { position: relative; z-index: 2; pointer-events: none; }
+
+/* ====== Éviter tout recouvrement parasite ====== */
+.card { position: relative; z-index: 0; }       /* base */
+.radials, .skills, .timeline { position: relative; z-index: 0; }
+.radial        { position: relative; z-index: 1; } /* langues au-dessus de leur fond */
+.radial svg, .radial .label { pointer-events: none; }
+
+/* Bonus confort visuel */
+.skill { padding: 12px; background: rgba(255,255,255,.03); }
+.skill:hover { background: rgba(255,255,255,.06); transition: background .18s ease; }
+.light .skill { background: rgba(0,0,0,.02); }
+.light .skill:hover { background: rgba(0,0,0,.04); }
+
+/* Accessibilité */
+.t-head:focus-visible, .skill:focus-within {
+  outline: 3px solid var(--accent1); outline-offset: 2px; border-radius: 10px;
+}
+
+/* ==== FORMATION : pleine largeur + hit-area fiable ==== */
+
+/* La liste s’étire sur 100% */
+.edu{
+  display: grid;
+  grid-template-columns: 1fr;     /* pleine largeur */
+  justify-items: stretch;
+  gap: 12px;
+}
+
+/* Chaque item remplit la ligne et capte confortablement le survol */
+.edu li{
+  position: relative;
+  width: 100%;
+  isolation: isolate;             /* évite chevauchements externes */
+  overflow: hidden;               /* rien ne dépasse de la carte */
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,.03);     /* carte légère */
+  transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+/* Couche de capture : toute la carte réagit */
+.edu li::before{
+  content:"";
+  position:absolute; inset:0;
+  background: transparent;
+  z-index: 1;                     /* capte les events */
+}
+
+/* Le contenu visuel passe au-dessus mais ne vole pas les events */
+.edu li > *{
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Hover confort */
+.edu li:hover{
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 6px 18px rgba(2,6,23,.12);
+  transform: translateY(-2px);
+}
+
+/* Variante claire */
+.light .edu li{
+  background: rgba(0,0,0,.02);
+}
+.light .edu li:hover{
+  background: rgba(0,0,0,.04);
+  box-shadow: 0 6px 16px rgba(15,23,42,.10);
+}
+
+/* Accessibilité clavier */
+.edu li:focus-visible{
+  outline: 3px solid var(--accent1);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+/* (OPTION) DEBUG : visualiser la vraie zone de survol — à retirer ensuite */
+.edu li:hover::after{
+  content:"";
+  position:absolute; inset:0;
+  background: rgba(0, 200, 255, .06);
+  pointer-events: none;
+}
+/* ==== Formation : pleine largeur + hover partout (version flex) ==== */
+
+/* Le conteneur occupe toute la largeur de la carte */
+#eduList,
+.edu{
+  display: flex !important;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  justify-content: stretch;
+  align-items: stretch;   /* ← étire les enfants sur la largeur */
+}
+
+/* Chaque item remplit 100% de la ligne */
+.edu li{
+  display: flex;          /* évite le comportement "list-item" étroit */
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,.03);
+  transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+/* Couche de capture : hover/clic partout dans la rangée */
+.edu li::before{
+  content:"";
+  position:absolute; inset:0;
+  background: transparent;
+  z-index: 1;
+}
+
+/* Le contenu ne “vole” pas les events (hover capte la carte entière) */
+.edu li > *{
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Feedback au survol */
+.edu li:hover{
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 6px 18px rgba(2,6,23,.12);
+  transform: translateY(-2px);
+}
+
+/* Thème clair */
+.light .edu li{ background: rgba(0,0,0,.02); }
+.light .edu li:hover{
+  background: rgba(0,0,0,.04);
+  box-shadow: 0 6px 16px rgba(15,23,42,.10);
+}
+
+/* Accessibilité */
+.edu li:focus-visible{
+  outline: 3px solid var(--accent1);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+/* (Debug temporaire) visualiser la vraie zone de hover — retire après vérif */
+.edu li:hover::after{
+  content:"";
+  position:absolute; inset:0;
+  background: rgba(0,200,255,.06);
+  pointer-events: none;
+}
+
+/* Forcer les items de formation à occuper toute la largeur */
+.edu li {
+  display: flex;            /* ou block, mais flex permet d’aligner texte + date */
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: rgba(255,255,255,.03);
+  cursor: default;          /* ou pointer si tu veux clic */
+  transition: background .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+
+/* Feedback au survol */
+.edu li:hover {
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 4px 12px rgba(2,6,23,.15);
+  transform: translateY(-2px);
+}
+
+/* Texte de la date aligné à droite */
+.edu li .date {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+/* Version clair */
+.light .edu li {
+  background: rgba(0,0,0,.02);
+}
+.light .edu li:hover {
+  background: rgba(0,0,0,.05);
+}
+
+/* === Compétences : pleine largeur + hit-area + lift sur .skill === */
+
+/* Le conteneur étire chaque ligne */
+.skills{
+  display: grid;
+  grid-template-columns: 1fr;       /* 100% largeur */
+  justify-items: stretch;
+  gap: 12px;
+}
+
+/* Chaque compétence est une carte pleine largeur */
+.skill{
+  position: relative;
+  display: grid;                    /* icône + contenu */
+  grid-template-columns: 36px 1fr;
+  align-items: center;
+  gap: 12px;
+
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 12px;
+
+  background: rgba(255,255,255,.03);
+  transition: transform .22s ease, box-shadow .22s ease, background .18s ease;
+  isolation: isolate;               /* évite tout chevauchement externe */
+  overflow: hidden;
+  cursor: default;                  /* ou pointer si tu veux */
+}
+
+/* Couche de capture : toute la carte réagit (pas que le texte) */
+.skill::before{
+  content:"";
+  position:absolute; inset:0;       /* 100% de la carte */
+  background: transparent;
+  z-index: 1;                       /* capte les events */
+}
+
+/* Le contenu visuel ne vole pas les events (hover reste sur .skill) */
+.skill > *{
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Effet visuel au hover + lift appliqué à .skill (pas besoin d'ajouter une div autour) */
+.skill:hover{
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 10px 24px rgba(2,6,23,.18);
+  transform: translateY(-4px) rotateX(1.2deg) rotateY(-1.2deg);
+}
+
+/* Variante claire */
+.light .skill{ background: rgba(0,0,0,.02); }
+.light .skill:hover{
+  background: rgba(0,0,0,.04);
+  box-shadow: 0 10px 20px rgba(15,23,42,.12);
+}
+
+/* Barres de progression : ne doivent pas capter les events */
+.skill .bar, .skill .fill, .skill .name { pointer-events: none; }
+
+/* Accessibilité clavier : focus visible sur la carte */
+.skill:focus-within{
+  outline: 3px solid var(--accent1);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* (Debug temporaire) Visualiser la vraie zone de hover — retire après test */
+.skill:hover::after{
+  content:"";
+  position:absolute; inset:0;
+  background: rgba(0,200,255,.06);
+  pointer-events: none;
+}
+
+/* ===== Force chaque ligne à s'étirer ET à capter les events sur toute la zone ===== */
+.skills,
+.edu {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;     /* pleine largeur */
+  justify-items: stretch;
+  width: 100%;
+  z-index: 0;                     /* base */
+}
+
+/* Compétences */
+.skill {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  isolation: isolate;             /* empilement isolé (évite chevauchement voisin) */
+  overflow: hidden;
+  z-index: 1;                     /* au-dessus du fond/voisins */
+  pointer-events: auto;           /* capte bien la souris */
+}
+
+.skill::before {
+  content: "";
+  position: absolute;
+  inset: 0;                       /* 100% de la carte */
+  z-index: 1;                     /* couche de capture */
+  background: transparent;
+}
+
+.skill > * {
+  position: relative;
+  z-index: 2;                     /* au-dessus de la couche de capture */
+  pointer-events: none;           /* les enfants ne volent pas les events */
+}
+
+/* Formation (même logique) */
+.edu li {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;                  /* titre + date */
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.03);
+  isolation: isolate;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.edu li::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: transparent;
+}
+.edu li > * {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Variante claire plus douce */
+.light .skill, .light .edu li { background: rgba(0,0,0,.02); }
+
+
+/* état initial (caché) */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+/* état visible */
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+.radial:hover {
+  box-shadow: 0 0 15px rgba(34,211,238,0.3),
+              0 0 25px rgba(168,85,247,0.2);
+  transform: scale(1.03);
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+
+.hero-text h1 {
+  opacity: 0;
+  transform: scale(0.95);
+  animation: fadeZoom 3s ease forwards;
+}
+
+@keyframes fadeZoom {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+.t-details > div {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.t-item.open .t-details > div {
+  opacity: 1;
+  transform: none;
+}
+
+/* ========= Typing ========= */
+.subtitle { display:flex; align-items:center; gap:6px; white-space:nowrap }
+.caret {
+  display:inline-block; width:1ch; text-align:center;
+  animation: blink 1s steps(1,end) infinite;
+}
+@keyframes blink { 50%{ opacity:0 } }
+
+/* ========= Micro-interactions ========= */
+
+/* Boutons : léger pulse/glow au survol */
+.btn {
+  position: relative;
+  transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.btn:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(34,211,238,.18), 0 12px 32px rgba(168,85,247,.12);
+}
+
+/* Variante claire pour les halos */
+.light .card:hover::after, .light .hero:hover::after, .light .t-item:hover::after, .light .skill:hover::after, .light .edu li:hover::after {
+  background: radial-gradient(600px 200px at var(--mx,50%) var(--my,30%),
+    rgba(34,211,238,.16), rgba(167,139,250,.12) 35%, transparent 60%);
+}
+
+/* Socials minimalistes, pro */
+.socials{
+  display:flex; align-items:center; gap:10px; margin-top:14px;
+  flex-wrap: wrap;
+}
+.socials .social-btn{
+  --size: 42px;
+  width: var(--size); height: var(--size);
+  display:grid; place-items:center;
+  border:1px solid var(--border);
+  border-radius: 999px;
+  background: linear-gradient(160deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  color: var(--fg);
+  text-decoration: none;
+  transition: transform .15s ease, box-shadow .22s ease, background .22s ease, border-color .22s ease;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* halo discret qui respecte tes accents */
+.socials .social-btn::after{
+  content:""; position:absolute; inset:-20%;
+  background: radial-gradient(280px 120px at var(--mx,50%) var(--my,50%),
+    rgba(34,211,238,.18), rgba(168,85,247,.12) 40%, transparent 60%);
+  opacity:0; transition: opacity .22s ease;
+  pointer-events:none; z-index:1;
+  filter: blur(8px);
+}
+.socials .social-btn:hover{
+  transform: translateY(-1px) scale(1.03);
+  border-color: rgba(255,255,255,.2);
+  box-shadow: 0 10px 24px rgba(34,211,238,.16), 0 12px 32px rgba(168,85,247,.12);
+  background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+}
+.socials .social-btn:hover::after{ opacity: .9 }
+
+.socials .social-btn svg{
+  position: relative; z-index:2;
+  opacity:.95;
+}
+
+/* Version claire */
+.light .socials .social-btn{
+  background: linear-gradient(160deg, rgba(0,0,0,.02), rgba(0,0,0,.01));
+  border-color: var(--border);
+}
+.light .socials .social-btn:hover{
+  background: linear-gradient(160deg, rgba(0,0,0,.04), rgba(0,0,0,.02));
+  box-shadow: 0 10px 20px rgba(15,23,42,.10);
+}
